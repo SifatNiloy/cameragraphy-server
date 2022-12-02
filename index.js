@@ -19,6 +19,7 @@ async function run() {
         console.log('database connected');
         const productCollection = client.db('cameragraphy').collection('products');
         const purchaseCollection = client.db('cameragraphy').collection('purchase');
+        const userCollection = client.db('cameragraphy').collection('users');
         app.get('/product', async (req, res) => {
             const query = {};
             const cursor = productCollection.find(query);
@@ -37,6 +38,18 @@ async function run() {
             const products = await cursor.toArray();
             res.send(products);
         })
+        //user put
+        app.put('/user/:email', async(req, res)=>{
+            const email= req.params.email;
+            const user= req.body;
+            const filter= {email: email};
+            const options= {upsert: true};
+            const updateDoc ={
+                $set:user,
+            };
+            const result= await userCollection.updateOne(filter, updateDoc, options);
+            res.send(result); 
+        })
 
         //post purchased product
         app.post('/purchased', async (req, res) => {
@@ -46,12 +59,21 @@ async function run() {
             res.send(result);
         })
         //get purchased
-        app.get('/purchased', async (req, res) => {
-            const query = {};
+        app.get('/purchased', async(req, res)=>{
+            console.log(req.query.body)
+            const email= req.query.email;
+            const query = {email: email};
             const cursor = purchaseCollection.find(query);
             const purchased = await cursor.toArray();
             res.send(purchased);
         })
+
+        // app.get('/purchased', async (req, res) => {
+        //     const query = {};
+        //     const cursor = purchaseCollection.find(query);
+        //     const purchased = await cursor.toArray();
+        //     res.send(purchased);
+        // })
        
        
     }
