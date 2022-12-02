@@ -18,6 +18,7 @@ async function run() {
         // await client.connect();
         console.log('database connected');
         const productCollection = client.db('cameragraphy').collection('products');
+        const purchaseCollection = client.db('cameragraphy').collection('purchase');
         app.get('/product', async (req, res) => {
             const query = {};
             const cursor = productCollection.find(query);
@@ -35,6 +36,21 @@ async function run() {
             const cursor = productCollection.find(query);
             const products = await cursor.toArray();
             res.send(products);
+        })
+
+        //post purchased product
+        app.post('/purchased', async (req, res) => {
+            
+            const purchased = req.body;
+            const result = await purchaseCollection.insertOne(purchased);
+            res.send(result);
+        })
+        //get purchased
+        app.get('/purchased', async (req, res) => {
+            const query = {};
+            const cursor = purchaseCollection.find(query);
+            const purchased = await cursor.toArray();
+            res.send(purchased);
         })
        
        
