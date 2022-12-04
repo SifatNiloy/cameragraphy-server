@@ -60,15 +60,31 @@ async function run() {
             const users = await userCollection.find().toArray();
             res.send(users);
         })
+
+        app.get('/admin/:email', async(req, res)=>{
+            const email= req.params.email;
+            const user= await userCollection.findOne({email: email});
+            const isAdmin = user.role=== 'admin';
+            res.send({admin: isAdmin})
+        })
+
         app.put('/user/admin/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
-            const filter = { email: email };
-            const updateDoc = {
-                $set: {role : 'admin'},
-            };
-            const result = await userCollection.updateOne(filter, updateDoc);
+            const requester=req.decoded.email; 
+            const requesterAccount= await userCollection.findOne({email: requester});
+            if(requesterAccount.role==='admin'){
+                const filter = { email: email };
+                const updateDoc = {
+                    $set: { role: 'admin' },
+                };
+                const result = await userCollection.updateOne(filter, updateDoc);
+
+                res.send(result);
+            }
+            else{
+                res.status(403).send({message: 'forbidden'});
+            }
             
-            res.send( result);
         })
 
         //user put
@@ -92,6 +108,14 @@ async function run() {
             const result = await purchaseCollection.insertOne(purchased);
             res.send(result);
         })
+
+        app.post('/newProduct', async(req, res)=>{
+            const newProduct= req.body;
+            console.log(newProduct)
+            const result=await productCollection.insertOne(newProduct);
+            res.send(result);
+        })
+
         //get purchased
         app.get('/purchased', verifyJWT, async(req, res)=>{
             // console.log(req.query.body)
@@ -108,13 +132,12 @@ async function run() {
             }
             
         })
-
-        // app.get('/purchased', async (req, res) => {
-        //     const query = {};
-        //     const cursor = purchaseCollection.find(query);
-        //     const purchased = await cursor.toArray();
-        //     res.send(purchased);
-        // })
+        app.get('/allorders', async (req, res) => {
+            const query = {};
+            const cursor = purchaseCollection.find(query);
+            const orders = await cursor.toArray();
+            res.send(orders);
+        })
        
        
     }
