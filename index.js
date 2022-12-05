@@ -108,7 +108,7 @@ async function run() {
             const result = await purchaseCollection.insertOne(purchased);
             res.send(result);
         })
-
+        
         app.post('/newProduct', async(req, res)=>{
             const newProduct= req.body;
             console.log(newProduct)
@@ -138,6 +138,14 @@ async function run() {
             const orders = await cursor.toArray();
             res.send(orders);
         })
+        //delete ordered product
+        app.delete('/allorders/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await purchaseCollection.deleteOne(query);
+            res.send(result);
+        })
+
        
        
     }
