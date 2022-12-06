@@ -37,6 +37,7 @@ async function run() {
         const productCollection = client.db('cameragraphy').collection('products');
         const purchaseCollection = client.db('cameragraphy').collection('purchase');
         const userCollection = client.db('cameragraphy').collection('users');
+        const reviewCollection = client.db('cameragraphy').collection('reviews');
         app.get('/product', async (req, res) => {
             const query = {};
             const cursor = productCollection.find(query);
@@ -115,12 +116,26 @@ async function run() {
             const result = await userCollection.deleteOne(query);
             res.send(result);
         })
+        //delete product
+        app.delete('/explore/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await productCollection.deleteOne(query);
+            res.send(result);
+        })
 
         //post purchased product
         app.post('/purchased', async (req, res) => {
             
             const purchased = req.body;
             const result = await purchaseCollection.insertOne(purchased);
+            res.send(result);
+        })
+        //post review
+        app.post('/reviews', async(req, res)=>{
+            // console.log(req.body)
+            const reviews = req.body;
+            const result = await reviewCollection.insertOne(reviews);
             res.send(result);
         })
         
@@ -147,6 +162,15 @@ async function run() {
             }
             
         })
+        //get reviews
+
+        app.get('/allreviews', async (req, res) => {
+            const query = {};
+            const cursor = reviewCollection.find(query);
+            const reviews = await cursor.toArray();
+            res.send(reviews);
+        })
+
         app.get('/allorders', async (req, res) => {
             const query = {};
             const cursor = purchaseCollection.find(query);
